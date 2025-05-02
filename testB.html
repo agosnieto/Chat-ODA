@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Presupuesto</title>
+</head>
+<body>
+  <h2>Actualizar estado de presupuesto</h2>
+  <form id="form">
+    <input type="text" id="telefono" placeholder="Teléfono con el que chateaste" required><br><br>
+    <input type="text" id="estado" placeholder="Estado (Enviado/Pendiente/etc)" required><br><br>
+    <input type="text" id="pdf" placeholder="Enlace al PDF"><br><br>
+    <input type="text" id="obs" placeholder="Observación (opcional)"><br><br>
+    <button type="submit">Actualizar</button>
+  </form>
+
+  <pre id="resultado"></pre>
+
+  <script>
+    const form = document.getElementById('form');
+    const resultado = document.getElementById('resultado');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const telefono = document.getElementById('telefono').value;
+      const estado = document.getElementById('estado').value;
+      const pdf = document.getElementById('pdf').value;
+      const obs = document.getElementById('obs').value;
+
+      const response = await fetch('http://localhost:3000/test-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telefono, estado, enlacePDF: pdf, observacion: obs })
+      });
+
+      const data = await response.json();
+      resultado.textContent = JSON.stringify(data, null, 2);
+    });
+  </script>
+</body>
+</html>
