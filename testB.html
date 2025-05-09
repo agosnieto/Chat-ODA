@@ -28,7 +28,7 @@
       const pdf = document.getElementById('pdf').value;
       const obs = document.getElementById('obs').value;
 
-      const response = await fetch('http://localhost:3000/test-update', {
+      const response = await fetch('http://localhost:3001/test-update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ telefono, estado, enlacePDF: pdf, observacion: obs })

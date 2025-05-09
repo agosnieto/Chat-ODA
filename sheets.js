@@ -9,12 +9,12 @@ const auth = new google.auth.JWT(
 );
 
 const sheets = google.sheets({ version: 'v4', auth });
-
+const  SHEET_NAME = 'DatosClientes'
 const appendRow = async (data) => {
   try {
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SHEET_ID,
-      range: 'A1', 
+      range: `${SHEET_NAME}!A1`, 
       valueInputOption: 'USER_ENTERED',
       resource: {
         values: [data],
@@ -25,5 +25,56 @@ const appendRow = async (data) => {
     console.error('Error al escribir en Sheets:', error);
   }
 };
+const getData = async () => {
+  try {
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: process.env.SHEET_ID,
+      range: `${SHEET_NAME}!A2:J100`, // Suponiendo que la fila 1 tiene encabezados
+    });
+    return res.data.values || [];
+  } catch (error) {
+    console.error('Error al leer de Sheets:', error);
+    return [];
+  }
+};
+const findRowByPhone = async (telefono) => {
+  const rows = await getData();
+  const index = rows.findIndex(row => row[6] === telefono); // columna G
+  return index >= 0 ? { rowNumber: index + 2, rowData: rows[index] } : null;
+};
 
-module.exports = { appendRow };
+const updateState = async (rowNumber, newState, fechaEnvio) => {
+  try {
+    const range = `${SHEET_NAME}!H${rowNumber}:K${rowNumber}`; 
+    const values = [[newState, fechaEnvio]];
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: process.env.SHEET_ID,
+      range,
+      valueInputOption: 'USER_ENTERED',
+      resource: { values },
+    });
+
+    console.log(`Estado actualizado para la fila ${rowNumber}`);
+  } catch (error) {
+    console.error('Error al actualizar estado:', error);
+  }
+};
+const updateRowStatus = async (rowNumber, estado, enlacePdf, observacion = '') => {
+  try {
+    const range = `${SHEET_NAME}!H${rowNumber}:J${rowNumber}`;
+    const values = [[estado, enlacePdf, observacion]];
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId:process.env.SHEET_ID,
+      range,
+      valueInputOption: 'USER_ENTERED',
+      resource: { values },
+    });
+
+    console.log(`Fila ${rowNumber} actualizada con estado "${estado}"`);
+  } catch (error) {
+    console.error('Error al actualizar fila:', error);
+  }
+};
+module.exports = { appendRow,getData,findRowByPhone,updateRowStatus, updateState};
