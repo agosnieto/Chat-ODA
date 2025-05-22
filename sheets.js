@@ -80,10 +80,31 @@ const updateRowStatus = async (rowNumber, estado, enlacePdf, observacion = '') =
   }
 };  
 
+async function addDataToSheet(row) {
+  const request = {
+    spreadsheetId: process.env.SHEET_ID,
+    range: SHEET_NAME, // Empezar en la segunda fila (bajo encabezados)
+    valueInputOption: 'USER_ENTERED',
+    insertDataOption: 'INSERT_ROWS',
+    resource: {
+      values: [row],
+    },
+  };
+
+  try {
+    await sheets.spreadsheets.values.append(request);
+    console.log('Fila agregada:', row);
+  } catch (err) {
+    console.error('Error agregando fila:', err);
+    throw err;
+  }
+}
+
 module.exports = {
   appendRow,
   getData,
   findRowByPhone,
   updateRowStatus,
-  updateState
+  updateState,
+  addDataToSheet
 };
